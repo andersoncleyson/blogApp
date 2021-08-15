@@ -21,7 +21,13 @@ router.get("/categories/add", (req, res) => {
 })
 
 router.get('/categories', (req, res) => {
-    res.render("admin/categories")
+    Categoria.find().sort({date:'desc'}).then((categories) => {
+        res.render("admin/categories", {categories: categories.map(categories => categories.toJSON())})
+    }).catch((err) => {
+        req.flash("erro_msg", "Houve um erro ao listar as categorias")
+        res.redirect("/admin")
+    })
+    
 })
 
 router.post("/categories/nova", (req, res) => {
