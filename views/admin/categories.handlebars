@@ -9,7 +9,10 @@
         <div class="card-body">
             <h4>{{nome}}</h4>
             <small>{{slug}}</small><br>
-            <small>Created: {{date}}</small>
+            <small>Created: {{date}}</small><br>
+            <a href="/admin/categories/edit/{{_id}}">
+                <button class="btn btn-success mt-3">Editar categoria</button>
+            </a>
         </div>
     </div>
 {{else}}

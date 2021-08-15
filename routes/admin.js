@@ -64,4 +64,53 @@ router.post("/categories/nova", (req, res) => {
     } 
 })
 
+router.get("/categories/edit/:id", (req, res) => {
+    Categoria.findOne({_id:req.params.id}).then((categories) => {
+        res.render("admin/editCategories", {categories: categories.toJSON()})
+    }).catch((err) => {
+        req.flash("error_msg", "Esta categoria não existe")
+        res.redirect("/admin/categories")
+    })
+    
+})
+
+router.post("/categories/edit", (req, res) => {
+    Categoria.findOne({_id: req.body.id}).then((categories) => {
+
+        var erros = []
+
+        if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
+            erros.push({text: "Nome inválido"})
+        }
+
+        if(!req.body.slug || typeof req.body.slug == undefined || req.body.slug == null){
+            erros.push({text: "Slug inválido"})
+        }
+
+        if(req.body.nome.length < 2){
+            erros.push({text: "Nome da categoria muito pequeno"})
+        }
+
+        if(erros.length > 0){
+            res.render("admin/editCategories", {erros: erros, categories: categories.toJSON()})
+        }else{
+            categories.nome = req.body.nome
+            categories.slug = req.body.slug
+
+            categories.save().then(() => {
+
+                req.flash("success_msg", "Categoria editada com sucesso")
+                res.redirect("/admin/categories")
+            }).catch((err) => {
+                req.flash("error_msg", "Houve um erro interno ao salvar a edição da categoria")
+                res.redirect("/admin/categories")
+            }) 
+        }
+       
+    }).catch((err) => {
+        req.flash("error_msg", "Houve um erro ao editar a categoria" + err)
+        res.redirect("/admin/categories")
+    })
+})
+
 module.exports = router
