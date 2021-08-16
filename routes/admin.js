@@ -8,6 +8,10 @@ require("../models/Categoria")
 
 const Categoria = mongoose.model("categories")
 
+require("../models/Postagem")
+
+const Postagem = mongoose.model("postagens")
+
 router.get('/', (req, res) => {
     res.render("admin/index")
 })
@@ -124,17 +128,51 @@ router.post("/categories/delete", (req, res) => {
 })
 
 router.get("/postagens", (req, res) => {
-    res.render("admin/postagens")
+    Postagem.find().lean().populate("categoria").sort({data: "desc"}).then((postagens) => {
+        res.render("admin/postagens", {postagens: postagens})
+    }).catch((err) => {
+        req.flash("error_msg", "Houve um erro " + err)
+        res.redirect("/admin")
+    })
+    
 })
 
 router.get("/postagens/add", (req, res) => {
     Categoria.find().lean().then((categories) => {
         res.render("admin/addPostagens", {categories: categories})
     }).catch((err) => {
-        req.flash("error_msg", "Houve um erro ao carregar o formulário")
+        req.flash("error_msg", "Houve um erro ao carregar o formulário" + err)
         res.redirect("/admin")
     })
     
+})
+
+router.post("/postagens/nova", (req, res) => {
+    var erros = []
+
+    if(req.body.categories == "0"){
+        erros.push({texto: "Categoria inválida, registre uma categoria"})
+    }
+
+    if(erros.length > 0){
+        res.render("admin/addPostagens", {erros: erros})
+    }else{
+        const novaPostagem = {
+            titulo: req.body.titulo,
+            descricao: req.body.descricao,
+            conteudo: req.body.conteudo,
+            categoria: req.body.categoria,
+            slug: req.body.slug
+        }
+
+        new Postagem(novaPostagem).save().then(() => {
+            req.flash("success_msg", "Postagem criada com sucesso!")
+            res.redirect("/admin/postagens")
+        }).catch((err) => {
+            req.flash("error_msg", "Houve um erro" + err)
+            res.redirect("/admin/postagens")
+        })
+    }
 })
 
 module.exports = router
