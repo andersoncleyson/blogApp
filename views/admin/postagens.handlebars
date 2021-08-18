@@ -10,8 +10,9 @@
         <div class="card-body">
             <h4>{{titulo}}</h4>
             <p>{{descricao}}</p>
-            <small>{{data}}</small>
-            <small>Categoria: {{categoria.nome}}</small>
+            <small>{{data}}</small><br>
+            <small>Categoria: {{categoria.nome}}</small><br>
+            <a href="/admin/postagens/edit/{{_id}}"><button class="btn btn-success mt-3">Editar postagem</button></a>
         </div>
     </div>
 {{else}}
