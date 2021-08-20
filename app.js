@@ -22,6 +22,11 @@ require("./models/Postagem")
 
 const Postagem = mongoose.model("postagens")
 
+require("./models/Categoria")
+
+const Categoria = mongoose.model("categories")
+
+const moment = require('moment')
 // Configurações
 app.use(session({
     secret: "anything",
@@ -42,7 +47,14 @@ app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 
 //Handlebars
-app.engine('handlebars', handlebars({defaultLayout: 'main'}))
+app.engine('handlebars', handlebars({
+    defaultLayout: 'main',
+    helpers:{
+        formatDate: (date) => {
+            return moment(date).format('DD/MM/YYYY')
+        }
+    }
+    }))
 app.set('view engine', 'handlebars')
 
 // Mongoose
@@ -88,8 +100,32 @@ app.get("/404", (req, res) => {
     res.send('Erro 404')
 })
 
-app.get("/posts", (req, res) => {
-    res.send("Lista posts")
+app.get("/categorias", (req, res) => {
+    Categoria.find().lean().then((categories) => {
+        res.render("categorias/index", {categories: categories})
+    }).catch((err) => {
+        req.flash("error_msg", "Houve algum erro" + err)
+        res.redirect("/")
+    })
+})
+
+app.get("/categorias/:slug", (req, res) => {
+    Categoria.findOne({slug: req.params.slug}).lean().then((categoria) => {
+        if(categoria){
+            Postagem.find({categoria: categoria._id}).then((postagens) => {
+                res.render("categorias/postagens", {postagens: postagens.map(Categoria => Categoria.toJSON())})
+            }).catch((err) => {
+                req.flash("error_msg", "Houve um erro" + err)
+                res.redirect("/")
+            })
+        }else{
+            req.flash("error_msg", "Esta categoria não existe")
+            res.redirect("/")
+        }
+    }).catch((err) => {
+        req.flash("error_msg", "Houve um erro interno" + err)
+        res.redirect("/")
+    })
 })
 
 app.use('/admin', admin)
