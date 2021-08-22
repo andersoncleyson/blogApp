@@ -26,7 +26,10 @@ require("./models/Categoria")
 
 const Categoria = mongoose.model("categories")
 
+const users = require("./routes/usuarios")
+
 const moment = require('moment')
+
 // Configurações
 app.use(session({
     secret: "anything",
@@ -129,6 +132,7 @@ app.get("/categorias/:slug", (req, res) => {
 })
 
 app.use('/admin', admin)
+app.use('/usuarios', users)
 
 // Outros
 

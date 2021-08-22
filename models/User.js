@@ -16,4 +16,4 @@ const User = new Schema({
     }
 })
 
-mongoose.nodel("user", User)
+mongoose.model("user", User)
