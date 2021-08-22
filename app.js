@@ -30,6 +30,8 @@ const users = require("./routes/usuarios")
 
 const moment = require('moment')
 
+const db = require("./config/db")
+
 // Configurações
 app.use(session({
     secret: "anything",
@@ -62,7 +64,7 @@ app.set('view engine', 'handlebars')
 
 // Mongoose
 mongoose.Promise = global.Promise;
-mongoose.connect("mongodb://localhost/blogapp").then(() => {
+mongoose.connect(db.mongoURI).then(() => {
     console.log("Server connected")
 }).catch((err) => {
     console.log("connect fail" + err)
@@ -136,7 +138,7 @@ app.use('/usuarios', users)
 
 // Outros
 
-const PORT = 3000
+const PORT = process.env.PORT || 8089
 app.listen(PORT, () => {
     console.log("Server is running...")
 })
